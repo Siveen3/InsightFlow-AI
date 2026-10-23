@@ -19,8 +19,7 @@ DEFAULT_PLACEHOLDERS = ("", "?", "N/A", "null")
 
 ID_THRESHOLD = 0.95          # uniqueness ratio that suggests an identifier
 MIN_ROWS_FOR_RATIOS = 30     # ratios are unreliable on tiny datasets
-MAX_CATEGORIES = 10          # at most this many unique values to be categorical
-MAX_CATEGORY_RATIO = 0.5     # ...and they can't be most of the rows
+MAX_CATEGORY_RATIO = 0.5     # categorical when unique values are not most rows
 NUMERIC_TEXT_THRESHOLD = 0.90
 
 
@@ -140,7 +139,7 @@ def classify_columns(df: pd.DataFrame,placeholders: Iterable[str] = DEFAULT_PLAC
         elif pd.api.types.is_numeric_dtype(series):
             if enough_rows and ratio >= ID_THRESHOLD and _is_integer_valued(series):
                 kind = "identifier"          # e.g. row_number 1..N
-            elif unique_count <= MAX_CATEGORIES and ratio <= MAX_CATEGORY_RATIO:
+            elif ratio <= MAX_CATEGORY_RATIO:
                 kind = "categorical"         # e.g. SeniorCitizen 0/1
             else:
                 kind = "numeric"
@@ -153,10 +152,7 @@ def classify_columns(df: pd.DataFrame,placeholders: Iterable[str] = DEFAULT_PLAC
                 kind = "free_text"
             elif enough_rows and ratio >= ID_THRESHOLD:
                 kind = "identifier"
-            elif (
-                unique_count <= MAX_CATEGORIES
-                or ratio <= MAX_CATEGORY_RATIO
-            ):
+            elif ratio <= MAX_CATEGORY_RATIO:
                 kind = "categorical"
             else:
                 kind = "free_text"
@@ -164,7 +160,7 @@ def classify_columns(df: pd.DataFrame,placeholders: Iterable[str] = DEFAULT_PLAC
                 kind = "numeric_as_text"     # checked BEFORE uniqueness
             elif enough_rows and ratio >= ID_THRESHOLD:
                 kind = "identifier"
-            elif unique_count <= MAX_CATEGORIES and ratio <= MAX_CATEGORY_RATIO:
+            elif ratio <= MAX_CATEGORY_RATIO:
                 kind = "categorical"
             else:
                 kind = "free_text"

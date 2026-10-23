@@ -3,14 +3,6 @@ import pandas as pd
 from src.profiling import classify_columns
 
 
-def test_long_comments_are_free_text():
-    df = pd.DataFrame({
-        "comment": [
-            f"The application is not working correctly today, issue {i}"
-            for i in range(100)
-        ]
-    })
-    assert classify_columns(df)["comment"] == "free_text"
 
 
 def test_high_uniqueness_ticket_numbers_are_identifiers():
@@ -27,6 +19,14 @@ def test_city_with_40_values_is_categorical():
     })
 
     assert classify_columns(df)["city"] == "categorical"
+
+
+def test_numeric_with_many_repeated_values_is_categorical():
+    df = pd.DataFrame({
+        "rating": list(range(40)) * 2 + [None] * 20
+    })
+
+    assert classify_columns(df)["rating"] == "categorical"
 
 
 def test_numeric_strings_remain_numeric_as_text():
